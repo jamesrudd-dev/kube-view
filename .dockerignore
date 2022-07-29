@@ -3,3 +3,6 @@
 .gitignore
 Makefile
 README.md
+test-kubernetes-deploy
+frontend/node_modules
+frontend/build
