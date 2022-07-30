@@ -1,16 +1,14 @@
-package main
+package handlers
 
 import (
 	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"net/http"
+	"jamesrudd-dev/kube-view/internal/models"
 	"path/filepath"
 	"strings"
 
-	"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/tidwall/gjson"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,37 +17,8 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-type KubernetesDeployment struct {
-	Namespace      string `json:"namespace"`
-	DeploymentName string `json:"deploymentName"`
-	ImageName      string `json:"imageName"`
-	ImageTag       string `json:"imageTag"`
-}
-
-func routes() http.Handler {
-	router := gin.Default()
-
-	// home page
-	router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
-
-	// create api routes
-	// router.GET("/deployments", getDeployments)
-
-	return router
-}
-
-func main() {
-
-	routes()
-	// define server handler and runtime options
-	// srv := &http.Server{
-	// 	Handler:      routes(),
-	// 	Addr:         "localhost:8080",
-	// 	WriteTimeout: 15 * time.Second,
-	// 	ReadTimeout:  15 * time.Second,
-	// }
-
-	// pull in kubeconfig
+func SetKubeConfig() (*kubernetes.Clientset, error) {
+	// pull in kubeconfig (if running outside cluster)
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -61,16 +30,32 @@ func main() {
 	// use the current context in kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
-	clientSet, _ := kubernetes.NewForConfig(config)
+	// creates the in-cluster config (if deployed in cluster)
+	// config, err := rest.InClusterConfig()
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
 
+	clientSet, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return clientSet, nil
+}
+
+func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error {
 	// get list of all namespaces
 	nsList, err := clientSet.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
+
+	// clear existing database for clean read
+	rdb.FlushAll()
 
 	// range through all namespaces to get deployments per namespace
 	for _, n := range nsList.Items {
@@ -79,22 +64,10 @@ func main() {
 			continue
 		}
 
-		// connect to redis and test connection
-		client := redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
-			Password: "",
-			DB:       0,
-		})
-
-		_, err := client.Ping().Result()
-		if err != nil {
-			panic(err.Error())
-		}
-
 		// get list of all deployments
 		deployments, err := clientSet.AppsV1().Deployments(n.Name).List(context.TODO(), v1.ListOptions{})
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 
 		// Marshal indent gives a pretty print of json object
@@ -105,7 +78,7 @@ func main() {
 		// println(result.String())
 
 		// make dynamic array from number of deployment
-		kubeData := make([]KubernetesDeployment, len(deployments.Items))
+		kubeData := make([]models.KubernetesDeployment, len(deployments.Items))
 
 		deploymentNames := (gjson.GetBytes(a, "items.#.metadata.name")).Array()
 		imageNames := (gjson.GetBytes(a, "items.#.spec.template.spec.containers.0.image")).Array()
@@ -132,21 +105,17 @@ func main() {
 
 			b, err := json.Marshal(kubeData[i])
 			if err != nil {
-				panic(err.Error())
+				return err
 			}
 
 			//fmt.Println(string(b))
 
-			err = client.Set(fmt.Sprintf("%s_%d", n.Name, key), b, 0).Err()
+			err = rdb.Set(fmt.Sprintf("%s_%d", n.Name, key), b, 0).Err()
 			key++
 			if err != nil {
-				fmt.Println(err)
+				return err
 			}
 		}
-		client.Close()
 	}
-
-	// run server
-	// srv.ListenAndServe()
-
+	return nil
 }

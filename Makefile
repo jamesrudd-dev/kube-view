@@ -1,5 +1,5 @@
 run:
-	npm --prefix ./frontend run build && go run main.go
+	npm --prefix ./frontend run build && go run ./cmd/kube-view/*.go
 
 react-build:
 	npm --prefix ./frontend run build
