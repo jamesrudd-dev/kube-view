@@ -15,11 +15,10 @@ func routes() http.Handler {
 	router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
 
 	// create api routes
-	router.GET("/hello", api.HelloWorld)
 	router.GET("/deployments/:namespace", api.GetDeploymentsfromNamespace)
 	router.GET("/cluster/namespaces", api.GetClusterNamespaces)
-	router.POST("/deployments/refresh", api.PostDeploymentsRefresh)
-	// router.POST("/cluster/:context", api.PostChangeClusterContext)
+	router.POST("/cluster/refresh", api.PostClusterRefresh)
+	router.POST("/cluster-change/:context", api.PostChangeClusterContext)
 
 	return router
 }

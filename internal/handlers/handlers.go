@@ -13,31 +13,37 @@ import (
 	"github.com/tidwall/gjson"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
-func SetKubeConfig() (*kubernetes.Clientset, error) {
-	// pull in kubeconfig (if running outside cluster)
-	var kubeconfig *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
+var Kubeconfig *string
 
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+func SetKubeContext(context string) (*rest.Config, error) {
+	configLoadingRules := &clientcmd.ClientConfigLoadingRules{ExplicitPath: *Kubeconfig}
+	configOverrides := &clientcmd.ConfigOverrides{CurrentContext: context}
+
+	config, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(configLoadingRules, configOverrides).ClientConfig()
 	if err != nil {
 		return nil, err
 	}
+	return config, nil
+}
 
-	// creates the in-cluster config (if deployed in cluster)
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
+func SetKubeConfig() (*kubernetes.Clientset, error) {
+	// pull in kubeconfig (if running outside cluster)
+	if home := homedir.HomeDir(); home != "" {
+		Kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		Kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+
+	config, err := SetKubeContext("epe-kubernetes")
+	if err != nil {
+		return nil, err
+	}
 
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -55,12 +61,12 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 	}
 
 	// clear existing database for clean read
-	rdb.FlushAll()
+	rdb.FlushDB()
 
 	// range through all namespaces to get deployments per namespace
 	for _, n := range nsList.Items {
 
-		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" {
+		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" {
 			continue
 		}
 
@@ -73,19 +79,12 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 		// Marshal indent gives a pretty print of json object
 		a, _ := json.MarshalIndent(deployments, "", "    ")
 
-		// println(string(a))
-		// result := gjson.Parse(string(a))
-		// println(result.String())
-
 		// make dynamic array from number of deployment
 		kubeData := make([]models.KubernetesDeployment, len(deployments.Items))
 
 		deploymentNames := (gjson.GetBytes(a, "items.#.metadata.name")).Array()
 		imageNames := (gjson.GetBytes(a, "items.#.spec.template.spec.containers.0.image")).Array()
 
-		// println(deploymentNames[0].String())
-		// println(imageNames[0].String())
-		var key = 0
 		for i := 0; i < len(deployments.Items); i++ {
 			kubeData[i].Namespace = n.Name
 			kubeData[i].DeploymentName = (deploymentNames[i]).String()
@@ -101,17 +100,12 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 				kubeData[i].ImageTag = "latest"
 			}
 
-			//kubeData[i].ImageName = (imageNames[i]).String()
-
-			b, err := json.Marshal(kubeData[i])
+			marshalledData, err := json.Marshal(kubeData[i])
 			if err != nil {
 				return err
 			}
 
-			//fmt.Println(string(b))
-
-			err = rdb.Set(fmt.Sprintf("%s_%d", n.Name, key), b, 0).Err()
-			key++
+			err = rdb.Set(fmt.Sprintf("%s_%s", n.Name, kubeData[i].DeploymentName), marshalledData, 0).Err()
 			if err != nil {
 				return err
 			}

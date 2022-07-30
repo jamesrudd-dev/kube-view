@@ -28,11 +28,12 @@ func main() {
 		panic(err.Error())
 	}
 
-	redisClient, err := database.ConnectRedis()
+	redisClient, err := database.InitialConnectRedis()
 	if err != nil {
 		panic(err.Error())
 	}
 
+	api.SetKubeConfig(clientSet)
 	api.SetDatabase(redisClient)
 
 	err = handlers.ScrapeKubernetes(clientSet, redisClient)
