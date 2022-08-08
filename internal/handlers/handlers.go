@@ -85,7 +85,9 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 		deploymentNames := (gjson.GetBytes(a, "items.#.metadata.name")).Array()
 		imageNames := (gjson.GetBytes(a, "items.#.spec.template.spec.containers.0.image")).Array()
 
+		z := 0
 		for i := 0; i < len(deployments.Items); i++ {
+			kubeData[i].ID = z
 			kubeData[i].Namespace = n.Name
 			kubeData[i].DeploymentName = (deploymentNames[i]).String()
 
@@ -105,10 +107,12 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 				return err
 			}
 
-			err = rdb.Set(fmt.Sprintf("%s_%s", n.Name, kubeData[i].DeploymentName), marshalledData, 0).Err()
+			//err = rdb.Set(fmt.Sprintf("%s_%s", n.Name, kubeData[i].DeploymentName), marshalledData, 0).Err()
+			err = rdb.Set(fmt.Sprintf("%s_%d", n.Name, z), marshalledData, 0).Err()
 			if err != nil {
 				return err
 			}
+			z++
 		}
 	}
 	return nil

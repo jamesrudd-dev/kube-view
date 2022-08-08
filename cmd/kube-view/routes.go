@@ -4,7 +4,7 @@ import (
 	"jamesrudd-dev/kube-view/internal/api"
 	"net/http"
 
-	"github.com/gin-gonic/contrib/static"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,13 +12,13 @@ func routes() http.Handler {
 	router := gin.Default()
 
 	// home page
-	router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
+	// router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
+	router.Use(cors.Default())
 
 	// create api routes
-	router.GET("/deployments/:namespace", api.GetDeploymentsfromNamespace)
-	router.GET("/cluster/namespaces", api.GetClusterNamespaces)
-	router.POST("/cluster/refresh", api.PostClusterRefresh)
-	router.POST("/cluster-change/:context", api.PostChangeClusterContext)
+	router.GET("/deployments/:cluster/:namespace", api.GetDeploymentsfromNamespace)
+	router.GET("/cluster/:cluster/namespaces", api.GetClusterNamespaces)
+	router.POST("/cluster/:cluster/refresh", api.PostClusterRefresh)
 
 	return router
 }
