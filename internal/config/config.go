@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"log"
 	"os"
 	"strconv"
 )
@@ -18,7 +19,6 @@ func inProduction() (bool, string) {
 	var err error
 
 	a := os.Getenv("IN_PRODUCTION")
-
 	appInProduction = false // default to false
 	if len(a) > 0 {
 		appInProduction, err = strconv.ParseBool(a) // parse value
@@ -26,12 +26,17 @@ func inProduction() (bool, string) {
 			panic(err.Error())
 		}
 	}
-
 	if appInProduction {
-		kubeConfig = os.Getenv("KUBE_CONFIG_LOCATION")
+		log.Printf("App set to run in PRODUCTION mode")
 	} else {
+		log.Printf("App set to run in DEVELOPMENT mode")
+	}
+
+	kubeConfig = os.Getenv("KUBE_CONFIG_LOCATION")
+	if len(kubeConfig) == 0 {
 		kubeConfig = "./test-kubeconfig" // set this to local config to test with
 	}
+	log.Printf("App set to use config located at: %s", kubeConfig)
 
 	return appInProduction, kubeConfig
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"jamesrudd-dev/kube-view/internal/api"
+	"jamesrudd-dev/kube-view/internal/config"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
@@ -9,6 +10,10 @@ import (
 )
 
 func routes() http.Handler {
+	if config.InProduction {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
 
 	// home page

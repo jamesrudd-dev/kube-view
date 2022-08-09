@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"jamesrudd-dev/kube-view/internal/api"
 	"jamesrudd-dev/kube-view/internal/config"
 	"jamesrudd-dev/kube-view/internal/database"
 	"jamesrudd-dev/kube-view/internal/handlers"
+	"log"
 	"net/http"
 	"time"
 )
@@ -30,19 +32,22 @@ func main() {
 	// read kubeconfig for clusterList
 	clusterList, err := handlers.ReadConfig(config.KubeConfigLocation)
 	if err != nil {
-		panic(err.Error())
+		err = errors.New("handlers.ReadConfig: failed to read kube config from given location")
+		panic(err)
 	}
 
 	// set kubeconfig
 	clientSet, clusterDatabase, err := handlers.SetKubeConfig(config.KubeConfigLocation, clusterList)
 	if err != nil {
-		panic(err.Error())
+		err = errors.New("handlers.SetKubeConfig: failed to set the initial kube config")
+		panic(err)
 	}
 
 	// connect to redis (base database - epe-kubernetes)
 	redisClient, err := database.InitialConnectRedis(clusterDatabase)
 	if err != nil {
-		panic(err.Error())
+		err = errors.New("database.InitialConnectRedis: failed initial connection to Redis")
+		panic(err)
 	}
 
 	// pass config and database connection config to api's
@@ -53,9 +58,11 @@ func main() {
 	// do initial scrape of epe-kubernetes to test config and database connection
 	err = handlers.ScrapeKubernetes(clientSet, redisClient)
 	if err != nil {
-		panic(err.Error())
+		err = errors.New("handlers.ScrapeKubernetes: failed initial scrape of kubernetes deployments")
+		panic(err)
 	}
 
+	log.Println("Starting web server...")
 	runHttpServer()
 
 	defer database.CloseRedis()
