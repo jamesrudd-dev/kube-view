@@ -71,8 +71,9 @@ func ReadConfig(filename string) ([]models.ClusterList, error) {
 	clusterList := make([]models.ClusterList, len(clusters))
 	propsID := 0
 	for _, n := range clusters {
+		cluster := strings.Split(n, ":")
 		clusterList[propsID].ID = propsID
-		clusterList[propsID].Cluster = n
+		clusterList[propsID].Cluster = strings.TrimSpace(cluster[1])
 		propsID++
 	}
 

@@ -84,7 +84,7 @@ func GetDeploymentsfromNamespace(c *gin.Context) {
 		})
 	}
 
-	test := make([]models.KubernetesDeployment, n)
+	deployments := make([]models.KubernetesDeployment, n)
 
 	for i := 0; i < n; i++ {
 		val, err := RDB.Get(ns + "_" + strconv.Itoa(i)).Result()
@@ -96,10 +96,10 @@ func GetDeploymentsfromNamespace(c *gin.Context) {
 		if err != nil {
 			panic(err.Error())
 		}
-		test[i] = prettyJSON
+		deployments[i] = prettyJSON
 	}
 
-	c.IndentedJSON(http.StatusOK, test)
+	c.IndentedJSON(http.StatusOK, deployments)
 }
 
 func PostClusterRefresh(c *gin.Context) {
@@ -168,7 +168,7 @@ func GetClusterNamespaces(c *gin.Context) {
 	namespaceList := make([]models.NamespaceList, len(nsList.Items))
 	propsID := 0
 	for _, n := range nsList.Items {
-		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" {
+		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" || n.Name == "linkerd" {
 			namespaceList = append(namespaceList[:propsID], namespaceList[propsID+1:]...)
 			continue
 		}

@@ -35,7 +35,7 @@ const ClusterRefresh = () => {
     <div>
       {err && <h2>{err}</h2>}
 
-      <button class="btn btn-outline-light" onClick={handleClick}>Refresh</button>
+      <button className="btn btn-outline-light" onClick={handleClick}>Refresh</button>
 
       {isLoading && <h2>Loading...</h2>}
 

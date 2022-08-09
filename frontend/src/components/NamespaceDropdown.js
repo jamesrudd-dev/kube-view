@@ -1,29 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-class NamespaceDropdown extends React.Component {
-    state = {
-        values: []
-    }
-    componentDidMount() {
-        let cluster = "epe-kubernetes"
-        fetch(`http://localhost:8080/cluster/${cluster}/namespaces`)
-        .then(function(res) {
-            return res.json();
-        }).then((json)=> {
-            this.setState({
-               values: json
+axios.defaults.baseURL = 'http://localhost:8080';
+
+const NamespaceDropdown = ({ cluster, handleNamespaceChange }) => {
+    const [namespace, SetNamespace] = useState([]);
+
+    useEffect(() => {
+        if (cluster !== undefined) {
+            axios
+            .get(`/cluster/${cluster}/namespaces`)
+            .then((res) => {
+                console.log(res);
+                SetNamespace(res.data);
+                handleNamespaceChange(res.data[0]["namespace"])
             })
-        });
-    }
-    render(){
-        return <div className="drop-down">
-              <select>{
-                 this.state.values.map((obj) => {
-                     return <option value={obj.id}>namespace: {obj.namespace}</option>
-                 })
-              }</select>
-            </div>;
-    }
-}
+            .catch((err) => {
+                console.log(err);
+            });
+        }
+    }, [cluster, handleNamespaceChange]);
+
+    return (
+        <div>  
+            <label className="text-light" htmlFor="namespaceDropdown">Namespace:</label>
+            <select className="namespace-drop-down" name="namespaceDropdown" onChange={(namespace) => handleNamespaceChange(namespace.target.value)}>
+                {namespace.map(
+                    data => <option key={data.id}>{data.namespace}</option>
+                )}
+            </select>
+        </div>
+    );
+};
 
 export default NamespaceDropdown;
