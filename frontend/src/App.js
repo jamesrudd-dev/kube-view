@@ -1,13 +1,13 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import ClusterDropdown from './components/ClusterDropdown';
+import ClusterSelectionMenu from './components/ClusterSelectionMenu';
 
 function App() {
   return (
     <div className="App">
       <h1>Kube View</h1>
-      <ClusterDropdown />
+      <ClusterSelectionMenu />
     </div>
   );
 }
