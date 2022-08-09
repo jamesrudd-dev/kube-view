@@ -19,6 +19,7 @@ import (
 
 var RDB *redis.Client
 var KC *kubernetes.Clientset
+var CL []models.ClusterList
 
 func SetDatabase(rdb *redis.Client) {
 	RDB = rdb
@@ -26,6 +27,10 @@ func SetDatabase(rdb *redis.Client) {
 
 func SetKubeConfig(config *kubernetes.Clientset) {
 	KC = config
+}
+
+func SetClusterList(clusterList []models.ClusterList) {
+	CL = clusterList
 }
 
 func GetDeploymentsfromNamespace(c *gin.Context) {
@@ -36,22 +41,10 @@ func GetDeploymentsfromNamespace(c *gin.Context) {
 	ns := c.Param("namespace")
 	ctx := c.Param("cluster")
 
-	if ctx == "epe-kubernetes" {
-		clusterDatabase = 0
-	} else if ctx == "aus-prod-kubernetes" {
-		clusterDatabase = 1
-	} else if ctx == "old-aus-prod-kubernetes" {
-		clusterDatabase = 2
-	} else if ctx == "us-uat-kubernetes" {
-		clusterDatabase = 3
-	} else if ctx == "us-prod-kubernetes" {
-		clusterDatabase = 4
-	} else if ctx == "uk-prod-kubernetes" {
-		clusterDatabase = 5
-	} else {
-		c.IndentedJSON(http.StatusNotFound, gin.H{
-			"error": "cluster context doesn't exist",
-		})
+	for i := range CL {
+		if CL[i].Cluster == ctx {
+			clusterDatabase = i
+		}
 	}
 
 	RDB, _ = database.ChangeRedisDatabase(RDB, clusterDatabase)
@@ -114,27 +107,29 @@ func PostClusterRefresh(c *gin.Context) {
 
 	ctx := c.Param("cluster")
 
-	if ctx == "epe-kubernetes" {
-		clusterDatabase = 0
-	} else if ctx == "aus-prod-kubernetes" {
-		clusterDatabase = 1
-	} else if ctx == "old-aus-prod-kubernetes" {
-		clusterDatabase = 2
-	} else if ctx == "us-uat-kubernetes" {
-		clusterDatabase = 3
-	} else if ctx == "us-prod-kubernetes" {
-		clusterDatabase = 4
-	} else if ctx == "uk-prod-kubernetes" {
-		clusterDatabase = 5
-	} else {
-		c.IndentedJSON(http.StatusNotFound, gin.H{
-			"error": "cluster context doesn't exist",
-		})
+	for i := range CL {
+		if CL[i].Cluster == ctx {
+			clusterDatabase = i
+		}
 	}
 
 	RDB, _ = database.ChangeRedisDatabase(RDB, clusterDatabase)
 
-	err := handlers.ScrapeKubernetes(KC, RDB)
+	config, err := handlers.SetKubeContext(ctx)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{
+			"error": "failed to changed context",
+		})
+	}
+
+	KC, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{
+			"error": "failed to changed context",
+		})
+	}
+
+	err = handlers.ScrapeKubernetes(KC, RDB)
 	if err != nil {
 		c.IndentedJSON(http.StatusNotFound, gin.H{
 			"error": "deployment list has faled to refresh",
@@ -170,13 +165,25 @@ func GetClusterNamespaces(c *gin.Context) {
 			"error": "failed to fetch namespaces in cluster",
 		})
 	}
-	var test []string
+	namespaceList := make([]models.NamespaceList, len(nsList.Items))
+	propsID := 0
 	for _, n := range nsList.Items {
 		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" {
+			namespaceList = append(namespaceList[:propsID], namespaceList[propsID+1:]...)
 			continue
 		}
-		test = append(test, n.Name)
+		namespaceList[propsID].ID = propsID
+		namespaceList[propsID].Namespace = n.Name
+		propsID++
 	}
 
-	c.IndentedJSON(http.StatusOK, test)
+	c.IndentedJSON(http.StatusOK, namespaceList)
+}
+
+func GetClusterList(c *gin.Context) {
+
+	println(CL)
+
+	c.IndentedJSON(http.StatusOK, CL)
+
 }

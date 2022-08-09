@@ -23,19 +23,30 @@ func runHttpServer() {
 
 func main() {
 
+	// set kubeconfig
 	clientSet, err := handlers.SetKubeConfig()
 	if err != nil {
 		panic(err.Error())
 	}
 
+	// read kubeconfig for clusterList
+	clusterList, err := handlers.ReadConfig("/home/jrudd/.kube/config")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// connect to redis (base database - epe-kubernetes)
 	redisClient, err := database.InitialConnectRedis()
 	if err != nil {
 		panic(err.Error())
 	}
 
+	// pass config and database connection config to api's
 	api.SetKubeConfig(clientSet)
 	api.SetDatabase(redisClient)
+	api.SetClusterList(clusterList)
 
+	// do initial scrape of epe-kubernetes to test config and database connection
 	err = handlers.ScrapeKubernetes(clientSet, redisClient)
 	if err != nil {
 		panic(err.Error())

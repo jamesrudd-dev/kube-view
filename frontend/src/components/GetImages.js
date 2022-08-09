@@ -9,8 +9,10 @@ const GetImages = () => {
   }, []);
 
   const fetchImages = () => {
+    let cluster = 'epe-kubernetes'
+    let namespace = 'dev'
     axios
-    .get('/deployments/qa')
+    .get(`/deployments/${cluster}/${namespace}`)
     .then((res) => {
       console.log(res);
       setImages(res.data);

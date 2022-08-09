@@ -18,6 +18,7 @@ func routes() http.Handler {
 	// create api routes
 	router.GET("/deployments/:cluster/:namespace", api.GetDeploymentsfromNamespace)
 	router.GET("/cluster/:cluster/namespaces", api.GetClusterNamespaces)
+	router.GET("cluster/list", api.GetClusterList)
 	router.POST("/cluster/:cluster/refresh", api.PostClusterRefresh)
 
 	return router

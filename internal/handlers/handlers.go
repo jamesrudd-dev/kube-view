@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"jamesrudd-dev/kube-view/internal/models"
+	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/go-redis/redis"
@@ -51,6 +53,28 @@ func SetKubeConfig() (*kubernetes.Clientset, error) {
 	}
 
 	return clientSet, nil
+}
+
+func ReadConfig(filename string) ([]models.ClusterList, error) {
+	b, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	config := string(b)
+
+	r, _ := regexp.Compile("cluster: (.*-kubernetes)")
+	clusters := r.FindAllString(config, -1)
+
+	clusterList := make([]models.ClusterList, len(clusters))
+	propsID := 0
+	for _, n := range clusters {
+		clusterList[propsID].ID = propsID
+		clusterList[propsID].Cluster = n
+		propsID++
+	}
+
+	return clusterList, nil
 }
 
 func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error {
