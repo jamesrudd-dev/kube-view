@@ -26,7 +26,7 @@ const GetImages = ({ cluster, namespace }) => {
           setIsLoading(false);
           setTimeout(() => {
             setIsVisible(true);
-          }, 1500);
+          }, 500);
       })
     }
   }, [cluster, namespace]);

@@ -9,6 +9,7 @@ const NamespaceDropdown = ({ cluster, handleNamespaceChange }) => {
     const [currentNamespace, setCurrentNamespace] = useState("");
 
     useEffect(() => {
+        SetNamespace([])
         if (cluster !== undefined) {
             axios
             .get(`/cluster/${cluster}/namespaces`)
