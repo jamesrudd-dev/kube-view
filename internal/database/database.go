@@ -4,12 +4,12 @@ import "github.com/go-redis/redis"
 
 var client *redis.Client
 
-func InitialConnectRedis() (*redis.Client, error) {
+func InitialConnectRedis(clusterDatabase int) (*redis.Client, error) {
 	// connect to redis and test connection
 	client = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
-		DB:       0,
+		DB:       clusterDatabase,
 	})
 
 	_, err := client.Ping().Result()

@@ -42,7 +42,7 @@ func GetDeploymentsfromNamespace(c *gin.Context) {
 	ctx := c.Param("cluster")
 
 	for i := range CL {
-		if CL[i].Cluster == ctx {
+		if strings.Contains(CL[i].Cluster, ctx) {
 			clusterDatabase = i
 		}
 	}
@@ -108,7 +108,7 @@ func PostClusterRefresh(c *gin.Context) {
 	ctx := c.Param("cluster")
 
 	for i := range CL {
-		if CL[i].Cluster == ctx {
+		if strings.Contains(CL[i].Cluster, ctx) {
 			clusterDatabase = i
 		}
 	}

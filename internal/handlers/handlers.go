@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"jamesrudd-dev/kube-view/internal/models"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -17,7 +16,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 var Kubeconfig *string
@@ -33,26 +31,30 @@ func SetKubeContext(context string) (*rest.Config, error) {
 	return config, nil
 }
 
-func SetKubeConfig() (*kubernetes.Clientset, error) {
-	// pull in kubeconfig (if running outside cluster)
-	if home := homedir.HomeDir(); home != "" {
-		Kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		Kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
+func SetKubeConfig(kubeConfig string, clusterList []models.ClusterList) (*kubernetes.Clientset, int, error) {
+	var clusterDatabase int
+
+	Kubeconfig = flag.String("kubeconfig", kubeConfig, "absolute path to the kubeconfig file")
 	flag.Parse()
 
+	for i := range clusterList {
+		if strings.Contains(clusterList[i].Cluster, "epe-kubernetes") {
+			clusterDatabase = i
+		}
+	}
+
+	// Set default context to epe-kubernetes
 	config, err := SetKubeContext("epe-kubernetes")
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
-	return clientSet, nil
+	return clientSet, clusterDatabase, nil
 }
 
 func ReadConfig(filename string) ([]models.ClusterList, error) {

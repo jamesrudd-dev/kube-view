@@ -2,6 +2,7 @@ package main
 
 import (
 	"jamesrudd-dev/kube-view/internal/api"
+	"jamesrudd-dev/kube-view/internal/config"
 	"jamesrudd-dev/kube-view/internal/database"
 	"jamesrudd-dev/kube-view/internal/handlers"
 	"net/http"
@@ -23,20 +24,23 @@ func runHttpServer() {
 
 func main() {
 
-	// set kubeconfig
-	clientSet, err := handlers.SetKubeConfig()
+	// Set OS Arguments
+	config.Set()
+
+	// read kubeconfig for clusterList
+	clusterList, err := handlers.ReadConfig(config.KubeConfigLocation)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// read kubeconfig for clusterList
-	clusterList, err := handlers.ReadConfig("/home/jrudd/.kube/config")
+	// set kubeconfig
+	clientSet, clusterDatabase, err := handlers.SetKubeConfig(config.KubeConfigLocation, clusterList)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	// connect to redis (base database - epe-kubernetes)
-	redisClient, err := database.InitialConnectRedis()
+	redisClient, err := database.InitialConnectRedis(clusterDatabase)
 	if err != nil {
 		panic(err.Error())
 	}
