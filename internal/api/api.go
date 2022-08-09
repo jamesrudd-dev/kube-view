@@ -78,12 +78,6 @@ func GetDeploymentsfromNamespace(c *gin.Context) {
 		}
 	}
 
-	if n == 0 {
-		c.IndentedJSON(http.StatusNotFound, gin.H{
-			"error": "namespace not found",
-		})
-	}
-
 	deployments := make([]models.KubernetesDeployment, n)
 
 	for i := 0; i < n; i++ {

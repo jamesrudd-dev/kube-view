@@ -1,7 +1,6 @@
-import GetImages from './GetImages';
 import NamespaceDropdown from './NamespaceDropdown';
 import ClusterRefresh from './ClusterRefresh';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 axios.defaults.baseURL = 'http://localhost:8080';
@@ -9,17 +8,10 @@ axios.defaults.baseURL = 'http://localhost:8080';
 const ClusterDropdown = () => {
     const [clusters, SetCluster] = useState([]);
     const [currentCluster, setCurrentCluster] = useState();
-    const [currentNamespace, setCurrentNamespace] = useState();
 
     const handleClusterChange = cluster => {
         setCurrentCluster(cluster)
     };
-
-    const handleNamespaceChange = useCallback(
-        namespace => {
-            setCurrentNamespace(namespace)
-        }, 
-    []);
 
     useEffect(() => {
         axios
@@ -36,10 +28,9 @@ const ClusterDropdown = () => {
     return (
         <div>
             <div className="row">
-
                 <div className="column">
                     <label className="text-light" htmlFor="clusterDropdown">Cluster:</label>
-                    <select className="cluster-drop-down" name="clusterDropdown" onChange={(cluster) => handleClusterChange(cluster.target.value)}>
+                    <select className="cluster-drop-down" name="clusterDropdown" defaultValue="" onChange={(cluster) => handleClusterChange(cluster.target.value)}>
                         <option value="" disabled>Select Cluster</option>
                         {clusters.map(
                             data => <option key={data.id}>{data.cluster}</option>
@@ -48,17 +39,14 @@ const ClusterDropdown = () => {
                 </div>
 
                 <div className="column">
-                <ClusterRefresh />
+                    <ClusterRefresh cluster={currentCluster}/>
                 </div>
 
-                <div className="column">
-                <NamespaceDropdown cluster={currentCluster} handleNamespaceChange={handleNamespaceChange}/>
-                </div>
             </div>
 
             <br></br>
 
-            {/* <GetImages cluster={currentCluster} namespace={currentNamespace}/> */}
+            <NamespaceDropdown cluster={currentCluster}/>
 
         </div>
     );
