@@ -1,12 +1,11 @@
 import React from 'react';
 
-class NamespaceDropdown extends React.Component {
+class ClusterDropdown extends React.Component {
     state = {
         values: []
     }
     componentDidMount() {
-        let cluster = "epe-kubernetes"
-        fetch(`http://localhost:8080/cluster/${cluster}/namespaces`)
+        fetch(`http://localhost:8080/cluster/list`)
         .then(function(res) {
             return res.json();
         }).then((json)=> {
@@ -19,11 +18,11 @@ class NamespaceDropdown extends React.Component {
         return <div className="drop-down">
               <select>{
                  this.state.values.map((obj) => {
-                     return <option value={obj.id}>namespace: {obj.namespace}</option>
+                     return <option value={obj.id}>{obj.cluster}</option>
                  })
               }</select>
             </div>;
     }
 }
 
-export default NamespaceDropdown;
+export default ClusterDropdown;
