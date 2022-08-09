@@ -182,8 +182,6 @@ func GetClusterNamespaces(c *gin.Context) {
 
 func GetClusterList(c *gin.Context) {
 
-	println(CL)
-
 	c.IndentedJSON(http.StatusOK, CL)
 
 }
