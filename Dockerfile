@@ -1,6 +1,7 @@
 FROM node:14 AS frontend-builder
 WORKDIR /kube-view-frontend
 COPY ./frontend .
+ENV PUBLIC_URL="/kube-view"
 RUN npm install && npm run build
 
 FROM golang:1.17.11-alpine as go-builder
