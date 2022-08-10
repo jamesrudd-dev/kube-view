@@ -11,7 +11,6 @@ const ClusterSelectionMenu = () => {
     const [currentNamespace, setCurrentNamespace] = useState("");
     const [postData, setPostData] = useState();
     const [isLoading, setIsLoading] = useState(false);
-    const [err, setErr] = useState('');
 
     // Used for cluster list
     useEffect(() => {
@@ -31,21 +30,21 @@ const ClusterSelectionMenu = () => {
       if (currentCluster !== undefined) {
         setIsLoading(true);
         try {
-          const {postData} = await axios.post(
+            const {postData} = await axios.post(
             `http://localhost:8080/cluster/${currentCluster}/refresh`,
             {
-              headers: {
+                headers: {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
-              },
+                },
             },
-          );
-    
-          console.log(JSON.stringify(postData, null, 4));
-    
-          setPostData(postData);
+            );
+
+            console.log(JSON.stringify(postData, null, 4));
+
+            setPostData(postData);
         } catch (err) {
-          setErr(err.message);
+            console.log(err)
         } finally {
             setIsLoading(false);
         }
@@ -76,34 +75,37 @@ const ClusterSelectionMenu = () => {
     return (
         <div>
             <div className="row">
-                <div className="column">
-                    <label className="text-light" htmlFor="clusterDropdown">Cluster:</label>
-                    <select className="cluster-drop-down" name="clusterDropdown" defaultValue="" onChange={(cluster) => setCurrentCluster(cluster.target.value)}>
-                        <option value="" disabled>Select Cluster</option>
+                <div className="column form-floating">
+
+                    <select className="form-select form-select-lg mb-3" id="floatingClusterSelect" aria-label="Cluster Selection" defaultValue="" onChange={(cluster) => setCurrentCluster(cluster.target.value)}>
+                        <option value="" disabled></option>
                         {clusters.map(
                             data => <option key={data.id}>{data.cluster}</option>
                         )}
                     </select>
+                    <label id="form-select-label" htmlFor="floatingClusterSelect">Cluster Selection</label>
+
                 </div>
 
                 <div className="column">
                     <div>
-                        {err && <h2>{err}</h2>}
 
-                        <button className="btn btn-outline-light" onClick={!isLoading ? clusterRefresh : null }>
+                        <button className="btn btn-outline-light btn-lg m-2" onClick={!isLoading ? clusterRefresh : null }>
                             {isLoading ? 'Refreshing...' : 'Refresh'}
                         </button>
 
                     </div>
                 </div>
 
-                <div className="column">
-                    <label className="text-light" htmlFor="namespaceDropdown">Namespace:</label>
-                    <select className="namespace-drop-down" name="namespaceDropdown" onChange={(namespace) => setCurrentNamespace(namespace.target.value)}>
-                    {namespace.map(
-                        data => <option key={data.id}>{data.namespace}</option>
-                    )}
-                </select>
+                <div className="column form-floating">
+
+                    <select className="form-select form-select-lg mb-3" id="floatingNamespaceSelect" aria-label="Namespace Selection" onChange={(namespace) => setCurrentNamespace(namespace.target.value)}>
+                        {namespace.map(
+                                data => <option id="test" key={data.id}>{data.namespace}</option>
+                        )}
+                    </select>
+                    <label id="form-select-label" htmlFor="floatingClusterSelect">Namespace Selection</label>
+                    
                 </div>
 
             </div>

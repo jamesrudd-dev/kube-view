@@ -9,21 +9,14 @@ body {
   background-color: rgb(28, 31, 36);
 }
 
-h1 {
-  font-size:3em;
-  line-height:2em;
+h1.app-header {
   color: whitesmoke;
+  margin-top: 2%;
+  margin-bottom: -0.3em;
 }
 
 h2 {
   color: whitesmoke;
-}
-
-h1.hidden {
-  font-size:3em;
-  line-height:2em;
-  color: whitesmoke;
-  visibility: hidden; 
 }
 
 h4 {
@@ -33,6 +26,11 @@ h4 {
 
 p {
   padding-top: 2%;
+}
+
+p.lead {
+  color: whitesmoke;
+  padding-bottom: 1%;
 }
 
 .container {
@@ -71,4 +69,25 @@ p {
 .loading-spinner {
   position: fixed;
   left: 48%;
+}
+
+.form-floating {
+  text-align: left;
+  color: whitesmoke;
+  background-color: rgb(28, 31, 36);
+  line-height: 50%;
+}
+
+.form-select {
+  text-align: left;
+  color: whitesmoke;
+  background-color: rgb(28, 31, 36);
+}
+
+#form-select-label {
+  padding-left: 7%;
+}
+
+select {
+  min-height: 90%;
 }

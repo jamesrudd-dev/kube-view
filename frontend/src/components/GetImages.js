@@ -10,7 +10,7 @@ const GetImages = ({ cluster, namespace, refresh }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (cluster !== undefined && namespace !== undefined && !refresh) {
+    if (cluster !== undefined && namespace !== "" && !refresh) {
       setImages([])
       setIsLoading(true);
       setIsVisible(false);
