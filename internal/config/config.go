@@ -43,7 +43,7 @@ func inProduction() (bool, string, string) {
 	if len(webServerPath) == 0 {
 		webServerPath = "/"
 	}
-	log.Printf("App set to use server web server at path: %s", webServerPath)
+	log.Printf("App web server set to use path: %s", webServerPath)
 
 	return appInProduction, kubeConfig, webServerPath
 }
