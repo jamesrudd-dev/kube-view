@@ -18,7 +18,7 @@ func routes() http.Handler {
 	router := gin.Default()
 
 	// home page
-	router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
+	router.Use(static.Serve(config.WebServerPath, static.LocalFile("./frontend/build", true)))
 	router.Use(cors.Default())
 
 	// create api routes

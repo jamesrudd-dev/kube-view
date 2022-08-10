@@ -11,9 +11,10 @@ import (
 var (
 	InProduction       bool   // set if running in production or not
 	KubeConfigLocation string // location of kubeconfig relative to app
+	WebServerPath      string // path webserver will be serving on
 )
 
-func inProduction() (bool, string) {
+func inProduction() (bool, string, string) {
 	var appInProduction bool
 	var kubeConfig string
 	var err error
@@ -38,13 +39,20 @@ func inProduction() (bool, string) {
 	}
 	log.Printf("App set to use config located at: %s", kubeConfig)
 
-	return appInProduction, kubeConfig
+	webServerPath := os.Getenv("WEB_SERVER_PATH")
+	if len(webServerPath) == 0 {
+		webServerPath = "/"
+	}
+	log.Printf("App set to use server web server at path: %s", webServerPath)
+
+	return appInProduction, kubeConfig, webServerPath
 }
 
 // Set configuration variables from os.Args
 func Set() {
-	appInProduction, kubeConfig := inProduction()
+	appInProduction, kubeConfig, webServerPath := inProduction()
 
 	flag.BoolVar(&InProduction, "inProduction", appInProduction, "Set if app in production environment.")
 	flag.StringVar(&KubeConfigLocation, "kubeConfig", kubeConfig, "Location of kube config to import.")
+	flag.StringVar(&WebServerPath, "webServerPath", webServerPath, "Path web server with serve on")
 }
