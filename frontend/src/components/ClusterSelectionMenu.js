@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import GetImages from './GetImages';
 
-axios.defaults.baseURL = 'http://localhost:8080';
+axios.defaults.baseURL = 'http://localhost:8080/kube-view';
 
 const ClusterSelectionMenu = () => {
     const [clusters, SetCluster] = useState([]);
@@ -15,7 +15,7 @@ const ClusterSelectionMenu = () => {
     // Used for cluster list
     useEffect(() => {
         axios
-        .get(`/cluster/list`)
+        .get(`/cluster/list`,{ crossDomain: true })
         .then((res) => {
             console.log(res);
             SetCluster(res.data);
