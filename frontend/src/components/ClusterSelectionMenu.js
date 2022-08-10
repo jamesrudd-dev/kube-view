@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import GetImages from './GetImages';
 
-axios.defaults.baseURL = 'http://localhost:8080/kube-view';
+axios.defaults.baseURL = 'http://localhost:8080';
 
 const ClusterSelectionMenu = () => {
     const [clusters, SetCluster] = useState([]);

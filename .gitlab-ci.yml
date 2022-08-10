@@ -10,3 +10,5 @@ docker-build-master:
     - docker tag "$CI_REGISTRY_IMAGE":latest "$CI_REGISTRY_IMAGE":release-1.0
     - docker push "$CI_REGISTRY_IMAGE":latest
     - docker push "$CI_REGISTRY_IMAGE":release-1.0
+  rules:
+    - when: manual
