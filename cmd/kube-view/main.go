@@ -15,7 +15,7 @@ func runHttpServer() {
 	// define server handler and runtime options
 	srv := &http.Server{
 		Handler:      routes(),
-		Addr:         "localhost:8080",
+		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -25,6 +25,10 @@ func runHttpServer() {
 }
 
 func main() {
+
+	log.Println("Starting up app...")
+	// sleep to let redis startup
+	time.Sleep(2 * time.Second)
 
 	// Set OS Arguments
 	config.Set()
@@ -62,7 +66,6 @@ func main() {
 		panic(err)
 	}
 
-	log.Println("Starting web server...")
 	runHttpServer()
 
 	defer database.CloseRedis()

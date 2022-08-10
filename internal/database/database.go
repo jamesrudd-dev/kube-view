@@ -7,7 +7,7 @@ var client *redis.Client
 func InitialConnectRedis(clusterDatabase int) (*redis.Client, error) {
 	// connect to redis and test connection
 	client = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "127.0.0.1:6379",
 		Password: "",
 		DB:       clusterDatabase,
 	})

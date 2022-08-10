@@ -1,34 +1,20 @@
-FROM golang:1.17.11-alpine as builder
+FROM node:14 AS frontend-builder
+WORKDIR /kube-view-frontend
+COPY ./frontend .
+RUN npm install && npm run build
 
-# Create appuser
-ENV USER=appuser
-ENV UID=10001
-
-RUN adduser \    
-    --disabled-password \    
-    --gecos "" \    
-    --home "/nonexistent" \    
-    --shell "/sbin/nologin" \    
-    --no-create-home \    
-    --uid "${UID}" \    
-    "${USER}"
-    
-WORKDIR $GOPATH/src/mypackage/myapp
-
+FROM golang:1.17.11-alpine as go-builder
+WORKDIR /kube-view
 COPY . .
-
 RUN go mod download
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-w -s" -o build/kube-view cmd/kube-view/*.go
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o /go/bin/main main.go
-
-FROM scratch
-
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-COPY --from=builder /go/bin/main /go/bin/main
-
-#COPY . .
-
-#USER appuser:appuser
-
-CMD ["/go/bin/main"]
+FROM redis:7-alpine as final
+ENV IN_PRODUCTION="false"
+ENV KUBE_CONFIG_LOCATION="/etc/config/kube-config"
+WORKDIR /app
+COPY --from=go-builder ./kube-view/build/kube-view .
+COPY --from=frontend-builder ./kube-view-frontend/build ./frontend/build
+COPY startup.sh /bin
+EXPOSE 8080
+ENTRYPOINT [ "/bin/startup.sh" ]

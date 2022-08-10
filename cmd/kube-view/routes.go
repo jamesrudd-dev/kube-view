@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +18,7 @@ func routes() http.Handler {
 	router := gin.Default()
 
 	// home page
-	// router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
+	router.Use(static.Serve("/", static.LocalFile("./frontend/build", true)))
 	router.Use(cors.Default())
 
 	// create api routes

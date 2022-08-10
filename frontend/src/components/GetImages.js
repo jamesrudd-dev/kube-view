@@ -4,7 +4,7 @@ import { TailSpin } from  'react-loader-spinner';
 
 axios.defaults.baseURL = 'http://localhost:8080';
 
-const GetImages = ({ cluster, namespace, refresh }) => {
+const GetImages = ({ cluster, namespace, refreshing }) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -12,7 +12,7 @@ const GetImages = ({ cluster, namespace, refresh }) => {
   const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
-    if (cluster !== undefined && namespace !== "" && !refresh) {
+    if (cluster !== undefined && namespace !== "" && !refreshing) {
       setSearchInput('');
       setFilteredResults([]);
       setImages([]);
@@ -34,13 +34,13 @@ const GetImages = ({ cluster, namespace, refresh }) => {
         }, 500);
       })
     }
-  }, [cluster, namespace, refresh]);
+  }, [cluster, namespace, refreshing]);
 
   const searchItems = (searchValue) => {
     setSearchInput(searchValue)
     if (searchInput !== '') {
         const filteredData = images.filter((item) => {
-            return Object.values(item).join('').toLowerCase().includes(searchInput.toLowerCase())
+            return Object.values(item["deploymentName"]).join('').toLowerCase().includes(searchInput.toLowerCase())
         })
         setFilteredResults(filteredData)
     }
