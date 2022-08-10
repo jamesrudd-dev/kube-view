@@ -7,11 +7,11 @@ html,body{
   width:100vw;
 }
 
-.App {
-  text-align: center;
-	max-width: 85%; 
-	margin: 0 auto !important; 
+.App { 
 	float: none !important; 
+	margin: 0 auto !important;
+	max-width: 85%;
+  text-align: center; 
 }
 
 body {
@@ -20,8 +20,8 @@ body {
 
 h1.app-header {
   color: whitesmoke;
-  margin-top: 2%;
   margin-bottom: -0.3em;
+  margin-top: 2%;
 }
 
 h2 {
@@ -29,8 +29,8 @@ h2 {
 }
 
 h4 {
-  padding-top: 3%;
   padding-bottom: 3%;
+  padding-top: 3%;
 }
 
 p {
@@ -43,12 +43,12 @@ p.lead {
 }
 
 .grid-container {
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 30px;
+  grid-template-columns: 25% 25% 25% 25%;
   margin-left: 10px;
   margin-right: 100px;
-  display: grid;
-  grid-template-columns: 25% 25% 25% 25%;
-  grid-gap: 30px;
-  grid-auto-flow: row;
 }
 
 .column {
@@ -58,9 +58,9 @@ p.lead {
 
 /* Clear floats after the columns */
 .row:after {
+  clear: both;
   content: "";
   display: table;
-  clear: both;
 }
 
 .namespace-drop-down {
@@ -72,33 +72,40 @@ p.lead {
 .cluster-drop-down {
   background-color: rgb(28, 31, 36);
   color: whitesmoke;
-  padding-left: 5%;
   margin-left: 1em;
+  padding-left: 5%;
 }
 
 .loading-spinner {
-  position: fixed;
   left: 48%;
+  position: fixed;
 }
 
 .form-floating {
-  text-align: left;
-  color: whitesmoke;
   background-color: rgb(28, 31, 36);
+  color: whitesmoke;
   line-height: 50%;
+  text-align: left;
 }
 
 .form-select {
-  text-align: left;
-  color: whitesmoke;
   background-color: rgb(28, 31, 36);
+  color: whitesmoke;
+  text-align: left;
 }
 
 #form-select-label {
-  position: absolute;
   padding-left: 35px;
+  position: absolute;
 }
 
 select {
   min-height: 90%;
+}
+
+#image-search-bar {
+  background-color: rgb(28, 31, 36);
+  color: whitesmoke;
+  position: relative;
+  width: 50%;
 }

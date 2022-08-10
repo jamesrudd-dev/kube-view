@@ -110,8 +110,6 @@ const ClusterSelectionMenu = () => {
 
             </div>
 
-            <br></br>
-
             <GetImages cluster={currentCluster} namespace={currentNamespace} refresh={isLoading}/>
 
         </div>
