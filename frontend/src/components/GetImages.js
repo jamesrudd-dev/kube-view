@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { TailSpin } from  'react-loader-spinner';
 
 axios.defaults.baseURL = 'http://localhost:8080';
 
-const GetImages = ({ cluster, namespace }) => {
+const GetImages = ({ cluster, namespace, refresh }) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (cluster !== undefined && namespace !== undefined) {
+    if (cluster !== undefined && namespace !== undefined && !refresh) {
+      setImages([])
       setIsLoading(true);
       setIsVisible(false);
-      setImages([])
       axios
       .get(`/deployments/${cluster}/${namespace}`)
       .then((res) => {
@@ -23,19 +24,24 @@ const GetImages = ({ cluster, namespace }) => {
         console.log(err);
       })
       .finally(() => {
-          setIsLoading(false);
-          setTimeout(() => {
-            setIsVisible(true);
-          }, 500);
+        setIsLoading(false);
+        setTimeout(() => {
+          setIsVisible(true);
+        }, 500);
       })
     }
-  }, [cluster, namespace]);
+  }, [cluster, namespace, refresh]);
 
   if (Object.keys(images).length > 0) {
     return (
       <div>  
 
-        {isLoading && <h2 className="text-light">Fetching from {namespace}</h2>}
+        <div className='loading-spinner'>
+          {isLoading && <TailSpin
+              color = 'white'
+              ariaLabel = 'tailspin-loading'     
+          />}
+        </div>
   
         <div className='container'>
           {images.map((data) => (
@@ -54,8 +60,18 @@ const GetImages = ({ cluster, namespace }) => {
   if (Object.keys(images).length === 0) {
     return (
       <div>
-        {isLoading && <h2 className="text-light">Fetching Deployments from {namespace}</h2>}
-        {isVisible && <h1>No deployments in this namespace.</h1>}
+
+        <div className='loading-spinner'>
+          {isLoading && <TailSpin
+              color = 'white'
+              ariaLabel = 'tailspin-loading'     
+          />}
+        </div>
+
+        <div>
+          {isVisible && <h2>No deployments in this namespace</h2>}
+        </div>
+
       </div>
     )
   }

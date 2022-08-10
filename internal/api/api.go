@@ -162,7 +162,7 @@ func GetClusterNamespaces(c *gin.Context) {
 	namespaceList := make([]models.NamespaceList, len(nsList.Items))
 	propsID := 0
 	for _, n := range nsList.Items {
-		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" || n.Name == "linkerd" {
+		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" || n.Name == "linkerd" || n.Name == "default" {
 			namespaceList = append(namespaceList[:propsID], namespaceList[propsID+1:]...)
 			continue
 		}

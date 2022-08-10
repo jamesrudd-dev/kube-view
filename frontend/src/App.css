@@ -15,6 +15,10 @@ h1 {
   color: whitesmoke;
 }
 
+h2 {
+  color: whitesmoke;
+}
+
 h1.hidden {
   font-size:3em;
   line-height:2em;
@@ -62,4 +66,9 @@ p {
   color: whitesmoke;
   padding-left: 5%;
   margin-left: 1em;
+}
+
+.loading-spinner {
+  position: fixed;
+  left: 48%;
 }
