@@ -43,9 +43,8 @@ const GetImages = ({ cluster, namespace, refresh }) => {
           />}
         </div>
   
-        <div className='container'>
+        <div className='grid-container'>
           {images.map((data) => (
-  
             <div className='card w-100 text-white bg-dark' key={data.id}>
               <h4 className='card-header'>{data.deploymentName}</h4>
               <p>{data.imageName}</p>

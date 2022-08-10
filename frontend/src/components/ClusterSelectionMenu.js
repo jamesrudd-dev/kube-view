@@ -74,7 +74,7 @@ const ClusterSelectionMenu = () => {
 
     return (
         <div>
-            <div className="row">
+            <div className="row mx-0">
                 <div className="column form-floating">
 
                     <select className="form-select form-select-lg mb-3" id="floatingClusterSelect" aria-label="Cluster Selection" defaultValue="" onChange={(cluster) => setCurrentCluster(cluster.target.value)}>
@@ -101,7 +101,7 @@ const ClusterSelectionMenu = () => {
 
                     <select className="form-select form-select-lg mb-3" id="floatingNamespaceSelect" aria-label="Namespace Selection" onChange={(namespace) => setCurrentNamespace(namespace.target.value)}>
                         {namespace.map(
-                                data => <option id="test" key={data.id}>{data.namespace}</option>
+                                data => <option key={data.id}>{data.namespace}</option>
                         )}
                     </select>
                     <label id="form-select-label" htmlFor="floatingClusterSelect">Namespace Selection</label>
@@ -111,11 +111,8 @@ const ClusterSelectionMenu = () => {
             </div>
 
             <br></br>
-            <br></br>
-            <div>
-                <GetImages cluster={currentCluster} namespace={currentNamespace} refresh={isLoading}/>
-            </div>
-            
+
+            <GetImages cluster={currentCluster} namespace={currentNamespace} refresh={isLoading}/>
 
         </div>
     );

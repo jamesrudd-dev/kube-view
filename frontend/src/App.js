@@ -8,7 +8,9 @@ function App() {
     <div className="App">
       <h1 className="display-4 app-header">Kube View</h1>
       <p className="lead">A display of deployed images inside your kubernetes clusters and environments</p>
-      <ClusterSelectionMenu />
+      <div>
+        <ClusterSelectionMenu />
+      </div>
     </div>
   );
 }
