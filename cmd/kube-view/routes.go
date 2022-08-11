@@ -24,10 +24,10 @@ func routes() http.Handler {
 	router.Use(cors.Default())
 
 	// create api routes
-	router.GET("/deployments/:cluster/:namespace", api.GetDeploymentsfromNamespace)
-	router.GET("/cluster/:cluster/namespaces", api.GetClusterNamespaces)
-	router.GET("/cluster/list", api.GetClusterList)
-	router.POST("/cluster/:cluster/refresh", api.PostClusterRefresh)
+	router.GET("/kube-view/deployments/:cluster/:namespace", api.GetDeploymentsfromNamespace)
+	router.GET("/kube-view/cluster/:cluster/namespaces", api.GetClusterNamespaces)
+	router.GET("/kube-view/cluster/list", api.GetClusterList)
+	router.POST("/kube-view/cluster/:cluster/refresh", api.PostClusterRefresh)
 
 	return router
 }

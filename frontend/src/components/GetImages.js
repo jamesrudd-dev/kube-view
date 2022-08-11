@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TailSpin } from  'react-loader-spinner';
 
-axios.defaults.baseURL = 'http://localhost:8080';
-
 const GetImages = ({ cluster, namespace, refreshing }) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +17,7 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
       setIsLoading(true);
       setIsVisible(false);
       axios
-      .get(`/deployments/${cluster}/${namespace}`)
+      .get(`/kube-view/deployments/${cluster}/${namespace}`)
       .then((res) => {
         console.log(res);
         setImages(res.data);
@@ -31,7 +29,7 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
         setIsLoading(false);
         setTimeout(() => {
           setIsVisible(true);
-        }, 500);
+        }, 2000);
       })
     }
   }, [cluster, namespace, refreshing]);
@@ -52,13 +50,6 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
   if (Object.keys(images).length > 0) {
     return (
       <div>  
-
-        <div className='loading-spinner'>
-          {isLoading && <TailSpin
-              color = 'white'
-              ariaLabel = 'tailspin-loading'     
-          />}
-        </div>
 
         <div class='row'>
           <div class='col-md-8 offset-md-4'>
@@ -101,11 +92,15 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
     return (
       <div>
 
-        <div className='loading-spinner'>
-          {isLoading && <TailSpin
-              color = 'white'
-              ariaLabel = 'tailspin-loading'     
-          />}
+        <div class="d-flex justify-content-center mt-5">
+          <div class="p-2"></div>
+          <div class="p-2">          
+            {isLoading && <TailSpin
+                color = 'white'
+                ariaLabel = 'tailspin-loading'     
+            />}
+          </div>
+          <div class="p-2"></div>
         </div>
 
         <div>

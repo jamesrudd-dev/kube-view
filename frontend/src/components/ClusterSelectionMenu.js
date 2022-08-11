@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import GetImages from './GetImages';
 
-axios.defaults.baseURL = 'http://localhost:8080';
-
 const ClusterSelectionMenu = () => {
     const [clusters, SetCluster] = useState([]);
     const [currentCluster, setCurrentCluster] = useState();
@@ -15,7 +13,7 @@ const ClusterSelectionMenu = () => {
     // Used for cluster list
     useEffect(() => {
         axios
-        .get(`/cluster/list`,{ crossDomain: true })
+        .get(`/kube-view/cluster/list`)
         .then((res) => {
             console.log(res);
             SetCluster(res.data);
@@ -31,7 +29,7 @@ const ClusterSelectionMenu = () => {
         setIsLoading(true);
         try {
             const {postData} = await axios.post(
-            `http://localhost:8080/cluster/${currentCluster}/refresh`,
+            `/kube-view/cluster/${currentCluster}/refresh`,
             {
                 headers: {
                 'Content-Type': 'application/json',
@@ -57,7 +55,7 @@ const ClusterSelectionMenu = () => {
         SetNamespace([])
         if (currentCluster !== undefined) {
             axios
-            .get(`/cluster/${currentCluster}/namespaces`)
+            .get(`/kube-view/cluster/${currentCluster}/namespaces`)
             .then((res) => {
                 console.log(res);
                 SetNamespace(res.data);

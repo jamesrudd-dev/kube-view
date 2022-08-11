@@ -76,11 +76,6 @@ p.lead {
   padding-left: 5%;
 }
 
-.loading-spinner {
-  left: 48%;
-  position: fixed;
-}
-
 .form-floating {
   background-color: rgb(28, 31, 36);
   color: whitesmoke;
