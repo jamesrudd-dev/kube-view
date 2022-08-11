@@ -5,7 +5,7 @@ import { TailSpin } from  'react-loader-spinner';
 const GetImages = ({ cluster, namespace, refreshing }) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  // const [isVisible, setIsVisible] = useState(false);
   const [filteredResults, setFilteredResults] = useState([]);
   const [searchInput, setSearchInput] = useState('');
 
@@ -15,7 +15,7 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
       setFilteredResults([]);
       setImages([]);
       setIsLoading(true);
-      setIsVisible(false);
+      // setIsVisible(false);
       axios
       .get(`/kube-view/deployments/${cluster}/${namespace}`)
       .then((res) => {
@@ -27,9 +27,9 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
       })
       .finally(() => {
         setIsLoading(false);
-        setTimeout(() => {
-          setIsVisible(true);
-        }, 2000);
+        // setTimeout(() => {
+        //   setIsVisible(true);
+        // }, 2000);
       })
     }
   }, [cluster, namespace, refreshing]);
@@ -103,9 +103,9 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
           <div class="p-2"></div>
         </div>
 
-        <div>
+        {/* <div>
           {isVisible && <h2>No deployments in this namespace</h2>}
-        </div>
+        </div> */}
 
       </div>
     )
