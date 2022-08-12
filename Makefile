@@ -1,5 +1,5 @@
 # Variables
-RELEASE_TAG := release-1.1
+RELEASE_TAG := release-1.0
 
 # Environmental Variables
 .EXPORT_ALL_VARIABLES:
