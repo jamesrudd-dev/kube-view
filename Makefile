@@ -3,11 +3,12 @@ RELEASE_TAG := release-1.0
 
 # Environmental Variables
 .EXPORT_ALL_VARIABLES:
-IN_PRODUCTION="false"
-KUBE_CONFIG_LOCATION=""
-WEB_SERVER_PATH="/kube-view"
-ImageTagFilter=""
-NamespaceFilter=""
+IN_PRODUCTION=false
+KUBE_CONFIG_LOCATION=
+WEB_SERVER_PATH=/kube-view
+PUBLIC_URL=${WEB_SERVER_PATH}
+IMAGE_TAG_FILTER=
+NAMESPACE_FILTER=
 
 run:
 	make react-build && make go-run 

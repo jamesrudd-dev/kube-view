@@ -24,8 +24,8 @@ FROM redis:7-alpine as final
 ENV IN_PRODUCTION="true"
 ENV KUBE_CONFIG_LOCATION="/etc/config/kube-config"
 ENV WEB_SERVER_PATH="/kube-view"
-ENV ImageTagFilter=""
-ENV NamespaceFilter=""
+ENV IMAGE_TAG_FILTER=""
+ENV NAMESPACE_FILTER=""
 
 WORKDIR /app
 COPY --from=go-builder ./kube-view/build/kube-view .

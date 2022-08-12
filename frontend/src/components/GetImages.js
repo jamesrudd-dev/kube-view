@@ -5,7 +5,7 @@ import { TailSpin } from  'react-loader-spinner';
 const GetImages = ({ cluster, namespace, refreshing }) => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  // const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [filteredResults, setFilteredResults] = useState([]);
   const [searchInput, setSearchInput] = useState('');
 
@@ -15,7 +15,7 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
       setFilteredResults([]);
       setImages([]);
       setIsLoading(true);
-      // setIsVisible(false);
+      setIsVisible(false);
       axios
       .get(`${process.env.PUBLIC_URL}/deployments/${cluster}/${namespace}`)
       .then((res) => {
@@ -26,10 +26,11 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
         console.log(err);
       })
       .finally(() => {
-        setIsLoading(false);
-        // setTimeout(() => {
-        //   setIsVisible(true);
-        // }, 2000);
+        const timer =setTimeout(() => {
+          setIsLoading(false);
+          setIsVisible(true);
+        }, 500);
+        return () => clearTimeout(timer);
       })
     }
   }, [cluster, namespace, refreshing]);
@@ -103,9 +104,9 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
           <div className="p-2"></div>
         </div>
 
-        {/* <div>
+        <div>
           {isVisible && <h2>No deployments in this namespace</h2>}
-        </div> */}
+        </div>
 
       </div>
     )
