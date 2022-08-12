@@ -171,7 +171,7 @@ func GetClusterNamespaces(c *gin.Context) {
 	propsID := 0
 	var stringMatch string
 	for _, n := range nsList.Items {
-		// filter to remove unwanted namespaces ## TODO - clean the logic here, need a better way to compare strings
+		// filter to remove unwanted namespaces ## TODO - clean the logic here, need a better way to compare strings (also in handlers)
 		for i := range filteredNamespaces {
 			if strings.Contains(n.Name, filteredNamespaces[i]) {
 				stringMatch = "match"

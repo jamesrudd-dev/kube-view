@@ -105,19 +105,21 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 	// clear existing database for clean read
 	rdb.FlushDB()
 
+	var stringMatch string
+	filteredNamespaces := strings.Fields(strings.Replace(config.NamespaceFilter, ",", " ", -1))
 	// range through all namespaces to get deployments per namespace
 	for _, n := range nsList.Items {
 
-		filteredNamespaces := strings.Split(config.NamespaceFilter, ",")
+		// filter to remove unwanted namespaces ## TODO - clean the logic here, need a better way to compare strings (also in apis)
 		for i := range filteredNamespaces {
 			if strings.Contains(n.Name, filteredNamespaces[i]) {
-				continue
+				stringMatch = "match"
 			}
 		}
-
-		// if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" {
-		// 	continue
-		// }
+		if stringMatch == "match" {
+			stringMatch = ""
+			continue
+		}
 
 		// get list of all deployments
 		deployments, err := clientSet.AppsV1().Deployments(n.Name).List(context.TODO(), v1.ListOptions{})
