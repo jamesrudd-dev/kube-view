@@ -13,7 +13,7 @@ const ClusterSelectionMenu = () => {
     // Used for cluster list
     useEffect(() => {
         axios
-        .get(`/kube-view/cluster/list`)
+        .get(`${process.env.PUBLIC_URL}/cluster/list`)
         .then((res) => {
             console.log(res);
             SetCluster(res.data);
@@ -29,7 +29,7 @@ const ClusterSelectionMenu = () => {
         setIsLoading(true);
         try {
             const {postData} = await axios.post(
-            `/kube-view/cluster/${currentCluster}/refresh`,
+            `${process.env.PUBLIC_URL}/cluster/${currentCluster}/refresh`,
             {
                 headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const ClusterSelectionMenu = () => {
         SetNamespace([])
         if (currentCluster !== undefined) {
             axios
-            .get(`/kube-view/cluster/${currentCluster}/namespaces`)
+            .get(`${process.env.PUBLIC_URL}/cluster/${currentCluster}/namespaces`)
             .then((res) => {
                 console.log(res);
                 SetNamespace(res.data);

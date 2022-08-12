@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"jamesrudd-dev/kube-view/internal/config"
 	"jamesrudd-dev/kube-view/internal/models"
 	"os"
 	"regexp"
@@ -20,6 +21,42 @@ import (
 
 var Kubeconfig *string
 
+// SetKubeConfig returns the clientset config to be used with k8s api.
+// It pulls in context value from above function.
+func SetKubeConfig(kubeConfig string, ctx string, clusterList []models.ClusterList) (*kubernetes.Clientset, int, error) {
+	var clusterDatabase int
+
+	// no context was set (meaning likely from first call from main)
+	// set appropriate flags and context to first context in clusterList
+	if ctx == "" {
+		Kubeconfig = flag.String("kubeconfig", kubeConfig, "absolute path to the kubeconfig file")
+		flag.Parse()
+		ctx = clusterList[0].Cluster
+	}
+
+	// if context was set, get database number for redis connection
+	for i := range clusterList {
+		if strings.Contains(clusterList[i].Cluster, ctx) {
+			clusterDatabase = i
+		}
+	}
+
+	// return config from context selection
+	config, err := SetKubeContext(ctx)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	// set clientset to use kubernetes config set to selected context
+	clientSet, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return clientSet, clusterDatabase, nil
+}
+
+// SetKubeContext overrides the context value within the kube config - called within SetKubeConfig function
 func SetKubeContext(context string) (*rest.Config, error) {
 	configLoadingRules := &clientcmd.ClientConfigLoadingRules{ExplicitPath: *Kubeconfig}
 	configOverrides := &clientcmd.ConfigOverrides{CurrentContext: context}
@@ -31,32 +68,8 @@ func SetKubeContext(context string) (*rest.Config, error) {
 	return config, nil
 }
 
-func SetKubeConfig(kubeConfig string, clusterList []models.ClusterList) (*kubernetes.Clientset, int, error) {
-	var clusterDatabase int
-
-	Kubeconfig = flag.String("kubeconfig", kubeConfig, "absolute path to the kubeconfig file")
-	flag.Parse()
-
-	for i := range clusterList {
-		if strings.Contains(clusterList[i].Cluster, "epe-kubernetes") {
-			clusterDatabase = i
-		}
-	}
-
-	// Set default context to epe-kubernetes
-	config, err := SetKubeContext("epe-kubernetes")
-	if err != nil {
-		return nil, -1, err
-	}
-
-	clientSet, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, -1, err
-	}
-
-	return clientSet, clusterDatabase, nil
-}
-
+// ReadConfig aims to extract the cluster names from the context section
+// of a kube config.
 func ReadConfig(filename string) ([]models.ClusterList, error) {
 	b, err := os.ReadFile(filename)
 	if err != nil {
@@ -80,6 +93,8 @@ func ReadConfig(filename string) ([]models.ClusterList, error) {
 	return clusterList, nil
 }
 
+// ScrapeKubernetes uses the client set and redis connection to connect to the current
+// context and extract deployment information to store in currently set redis database.
 func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error {
 	// get list of all namespaces
 	nsList, err := clientSet.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
@@ -93,9 +108,16 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 	// range through all namespaces to get deployments per namespace
 	for _, n := range nsList.Items {
 
-		if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" {
-			continue
+		filteredNamespaces := strings.Split(config.NamespaceFilter, ",")
+		for i := range filteredNamespaces {
+			if strings.Contains(n.Name, filteredNamespaces[i]) {
+				continue
+			}
 		}
+
+		// if strings.Contains(n.Name, "kube") || n.Name == "nginx-ingress" || n.Name == "verdaccio" || n.Name == "lens-metrics" || n.Name == "monitoring" {
+		// 	continue
+		// }
 
 		// get list of all deployments
 		deployments, err := clientSet.AppsV1().Deployments(n.Name).List(context.TODO(), v1.ListOptions{})
@@ -118,23 +140,28 @@ func ScrapeKubernetes(clientSet *kubernetes.Clientset, rdb *redis.Client) error 
 			kubeData[i].Namespace = n.Name
 			kubeData[i].DeploymentName = (deploymentNames[i]).String()
 
-			s := strings.ReplaceAll((imageNames[i]).String(), "635705773620.dkr.ecr.ap-southeast-2.amazonaws.com/", "")
-			if strings.Contains(s, ":") {
-				name := (strings.Split(s, ":"))[0]
-				tag := (strings.Split(s, ":"))[1]
+			// image tag filter to remove any prefixes from images ##TODO - enable this to handle multiple filters
+			filteredImages := imageNames[i].String()
+			if config.ImageTagFilter != "" {
+				filteredImages = strings.ReplaceAll((imageNames[i]).String(), config.ImageTagFilter, "")
+			}
+			if strings.Contains(filteredImages, ":") {
+				name := (strings.Split(filteredImages, ":"))[0]
+				tag := (strings.Split(filteredImages, ":"))[1]
 				kubeData[i].ImageName = name
 				kubeData[i].ImageTag = tag
 			} else {
-				kubeData[i].ImageName = s
+				kubeData[i].ImageName = filteredImages
 				kubeData[i].ImageTag = "latest"
 			}
 
+			// Encode into JSON
 			marshalledData, err := json.Marshal(kubeData[i])
 			if err != nil {
 				return err
 			}
 
-			//err = rdb.Set(fmt.Sprintf("%s_%s", n.Name, kubeData[i].DeploymentName), marshalledData, 0).Err()
+			// Commit the data to database
 			err = rdb.Set(fmt.Sprintf("%s_%d", n.Name, z), marshalledData, 0).Err()
 			if err != nil {
 				return err

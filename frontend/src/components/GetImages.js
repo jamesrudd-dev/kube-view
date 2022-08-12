@@ -17,7 +17,7 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
       setIsLoading(true);
       // setIsVisible(false);
       axios
-      .get(`/kube-view/deployments/${cluster}/${namespace}`)
+      .get(`${process.env.PUBLIC_URL}/deployments/${cluster}/${namespace}`)
       .then((res) => {
         console.log(res);
         setImages(res.data);
@@ -51,8 +51,8 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
     return (
       <div>  
 
-        <div class='row'>
-          <div class='col-md-8 offset-md-4'>
+        <div className='row'>
+          <div className='col-md-8 offset-md-4'>
             <input
               type="search" id="image-search-bar" className="form-control mt-3"
               icon='search' placeholder='Search Images...'
@@ -92,15 +92,15 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
     return (
       <div>
 
-        <div class="d-flex justify-content-center mt-5">
-          <div class="p-2"></div>
-          <div class="p-2">          
+        <div className="d-flex justify-content-center mt-5">
+          <div className="p-2"></div>
+          <div className="p-2">          
             {isLoading && <TailSpin
                 color = 'white'
                 ariaLabel = 'tailspin-loading'     
             />}
           </div>
-          <div class="p-2"></div>
+          <div className="p-2"></div>
         </div>
 
         {/* <div>

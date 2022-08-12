@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// runHttpServer set the configuration settings of web server
 func runHttpServer() {
 	// define server handler and runtime options
 	srv := &http.Server{
@@ -27,7 +28,7 @@ func runHttpServer() {
 func main() {
 
 	log.Println("Starting up app...")
-	// sleep to let redis startup
+	// sleep to confirm redis startup
 	time.Sleep(2 * time.Second)
 
 	// Set OS Arguments
@@ -36,21 +37,21 @@ func main() {
 	// read kubeconfig for clusterList
 	clusterList, err := handlers.ReadConfig(config.KubeConfigLocation)
 	if err != nil {
-		err = errors.New("handlers.ReadConfig: failed to read kube config from given location")
+		err = errors.New("MAIN - handlers.ReadConfig: failed to read kube config from given location")
 		panic(err)
 	}
 
-	// set kubeconfig
-	clientSet, clusterDatabase, err := handlers.SetKubeConfig(config.KubeConfigLocation, clusterList)
+	// set initial kubeconfig
+	clientSet, clusterDatabase, err := handlers.SetKubeConfig(config.KubeConfigLocation, "", clusterList)
 	if err != nil {
-		err = errors.New("handlers.SetKubeConfig: failed to set the initial kube config")
+		err = errors.New("MAIN - handlers.SetKubeConfig: failed to set the initial kube config")
 		panic(err)
 	}
 
 	// connect to redis (base database - epe-kubernetes)
 	redisClient, err := database.InitialConnectRedis(clusterDatabase)
 	if err != nil {
-		err = errors.New("database.InitialConnectRedis: failed initial connection to Redis")
+		err = errors.New("MAIN - database.InitialConnectRedis: failed initial connection to Redis")
 		panic(err)
 	}
 
@@ -62,12 +63,14 @@ func main() {
 	// do initial scrape of epe-kubernetes to test config and database connection
 	err = handlers.ScrapeKubernetes(clientSet, redisClient)
 	if err != nil {
-		err = errors.New("handlers.ScrapeKubernetes: failed initial scrape of kubernetes deployments")
+		err = errors.New("MAIN - handlers.ScrapeKubernetes: failed initial scrape of kubernetes deployments")
 		panic(err)
 	}
 
+	// start gin webserver
 	runHttpServer()
 
+	// close current redis connection on app shutdown
 	defer database.CloseRedis()
 
 }

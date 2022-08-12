@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// routes set the http handlers of the web server
 func routes() http.Handler {
 	if config.InProduction {
 		gin.SetMode(gin.ReleaseMode)
@@ -24,10 +25,10 @@ func routes() http.Handler {
 	router.Use(cors.Default())
 
 	// create api routes
-	router.GET("/kube-view/deployments/:cluster/:namespace", api.GetDeploymentsfromNamespace)
-	router.GET("/kube-view/cluster/:cluster/namespaces", api.GetClusterNamespaces)
-	router.GET("/kube-view/cluster/list", api.GetClusterList)
-	router.POST("/kube-view/cluster/:cluster/refresh", api.PostClusterRefresh)
+	router.GET(config.WebServerPath+"/deployments/:cluster/:namespace", api.GetDeploymentsfromNamespace)
+	router.GET(config.WebServerPath+"/cluster/:cluster/namespaces", api.GetClusterNamespaces)
+	router.GET(config.WebServerPath+"/cluster/list", api.GetClusterList)
+	router.POST(config.WebServerPath+"/cluster/:cluster/refresh", api.PostClusterRefresh)
 
 	return router
 }
