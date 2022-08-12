@@ -11,5 +11,6 @@ docker-build-master:
     - docker push "$CI_REGISTRY_IMAGE":latest
     - docker push "$CI_REGISTRY_IMAGE":release-1.0
   rules:
-    - when: manual
-      if: "$CI_COMMIT_BRANCH" == "master"
+    - if: '"$CI_COMMIT_BRANCH" == "master"'
+      when: manual
+      
