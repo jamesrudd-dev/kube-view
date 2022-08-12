@@ -8,12 +8,10 @@ docker-build-release:
     - export BRANCH_NAME=$(echo $CI_COMMIT_BRANCH | tr / -)
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE":latest .
-    - docker tag "$CI_REGISTRY_IMAGE":latest "$CI_REGISTRY_IMAGE":"BRANCH_NAME"
-    - docker tag "$CI_REGISTRY_IMAGE":latest "$CI_REGISTRY_IMAGE":"BRANCH_NAME"."$CI_PIPELINE_IID"
+    - docker tag "$CI_REGISTRY_IMAGE":latest "$CI_REGISTRY_IMAGE":"$BRANCH_NAME"
+    - docker tag "$CI_REGISTRY_IMAGE":latest "$CI_REGISTRY_IMAGE":"$BRANCH_NAME"."$CI_PIPELINE_IID"
     - docker push "$CI_REGISTRY_IMAGE":latest
-    - docker push "$CI_REGISTRY_IMAGE":"BRANCH_NAME"
-    - docker push "$CI_REGISTRY_IMAGE":"BRANCH_NAME"."$CI_PIPELINE_IID"
+    - docker push "$CI_REGISTRY_IMAGE":"$BRANCH_NAME"
+    - docker push "$CI_REGISTRY_IMAGE":"$BRANCH_NAME"."$CI_PIPELINE_IID"
   rules:
     - if: $CI_COMMIT_BRANCH =~ /release\/[0-9]+/
-      when: manual
-      
