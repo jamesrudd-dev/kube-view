@@ -85,8 +85,10 @@ const GetImages = ({ cluster, namespace, refreshing }) => {
               })
             )}
         </div>
-  
+        <br></br>
+        <br></br>
       </div>
+
     );
   }
   if (Object.keys(images).length === 0) {
