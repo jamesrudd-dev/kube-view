@@ -23,7 +23,14 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Kube View was built out of necessity of enabling non-developer team members to view which version (image tags) of applications are deployed across different Kubernetes clusters and environments. Without putting the burden on app developers to place functional version endpointing in their applications (although they should be anyway), Kube View sought to leverage the already functioning build pipelines that utilise current code-base branch naming along with current build number to create a container image tag.
+Kube View was built out of necessity of enabling non-developer team members to view which version (image tags) of applications are deployed across different Kubernetes clusters and environments. Although basically built to fit my own use-requirements and selfish reasoning behind the creation, i.e. to stop non-developer team members from consistently asking which version of a specific app is in which environment, Kube View should be in a state that enables usage for any cluster set-up (configured from kubectl config file).
+
+To note, a lot of customisation should be handled via environmental variables:
+* InProduction       [bool]   - set if running in production mode or not (predominatly impacts web-server conditions)
+* KubeConfigLocation [string] - location of kubeconfig relative to app
+* WebServerPath      [string] - path webserver will be serving on
+* ImageTagFilter     [string] - set this to clean up images tags to remove (for example) the AWS prefix, i.e. ###########.dkr.ecr.ap-southeast-2.amazonaws.com/, currently only one filter available
+* NamespaceFilter    [string] - comma seperated list containing namespaces desired to be removed from search, note: strings.Contains used for filter
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
