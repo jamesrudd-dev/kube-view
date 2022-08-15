@@ -1,5 +1,5 @@
 # Variables
-RELEASE_TAG := release-1.1
+RELEASE_TAG := ${git branch --show-current}
 
 # Environmental Variables
 .EXPORT_ALL_VARIABLES:
@@ -16,8 +16,14 @@ run:
 go-run:
 	go run ./cmd/kube-view/*.go
 
+go-install:
+	go mod download
+
 go-build:
 	CGO_ENABLED=0 go build -trimpath -ldflags="-w -s" -o build/kube-view cmd/kube-view/*.go
+
+react-install:
+	npm --prefix ./frontend install
 
 react-build:
 	npm --prefix ./frontend run build
