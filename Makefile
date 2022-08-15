@@ -1,5 +1,5 @@
 # Variables
-RELEASE_TAG := ${git branch --show-current}
+RELEASE_TAG := ${shell git branch --show-current}
 
 # Environmental Variables
 .EXPORT_ALL_VARIABLES:
