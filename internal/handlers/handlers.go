@@ -78,7 +78,7 @@ func ReadConfig(filename string) ([]models.ClusterList, error) {
 
 	config := string(b)
 
-	r, _ := regexp.Compile("cluster: (.*-kubernetes)")
+	r, _ := regexp.Compile("cluster: (.*)")
 	clusters := r.FindAllString(config, -1)
 
 	clusterList := make([]models.ClusterList, len(clusters))
